@@ -417,7 +417,7 @@ static int air001_erase(struct flash_bank *bank, unsigned int first,
 
 flash_lock:
 	{
-		int retval2 = target_write_u32(target, puyaf0x_get_flash_reg(bank, AIR001_FLASH_CR), FLASH_LOCK);
+		int retval2 = target_write_u32(target, air001_get_flash_reg(bank, AIR001_FLASH_CR), FLASH_LOCK);
 		if (retval == ERROR_OK)
 			retval = retval2;
 	}
