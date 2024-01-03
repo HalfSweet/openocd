@@ -1100,7 +1100,7 @@ static int air001_mass_erase(struct flash_bank *bank)
 		goto flash_lock;
 
 	/* mass erase flash memory */
-	retval = target_write_u32(target, air001_get_flash_reg(bank, AIR001_FLASH_CR), FLASH_MER | FLASH_EOPIE | FLASH_ERRIE);
+	retval = target_write_u32(target, air001_get_flash_reg(bank, AIR001_FLASH_CR), FLASH_MER | FLASH_EOPIE);
 	if (retval != ERROR_OK)
 		goto flash_lock;
 
