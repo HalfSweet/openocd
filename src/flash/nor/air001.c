@@ -230,7 +230,7 @@ static int air001_read_options(struct flash_bank *bank)
 	int retval;
 
 	/* read user and read protection option bytes, user data option bytes */
-	retval = target_read_u32(target, STM32_FLASH_OBR_B0, &option_bytes);
+	retval = target_read_u32(target, AIR001_FLASH_OPTR_B0, &option_bytes);
 	if (retval != ERROR_OK)
 		return retval;
 
@@ -572,7 +572,7 @@ static int air001_get_property_addr(struct target *target, struct air001_propert
 		return ERROR_TARGET_NOT_EXAMINED;
 	}
 
-	switch (cortex_m_get_partno_safe(target)) {
+	switch (cortex_m_get_impl_part(target)) {
 	case CORTEX_M0P_PARTNO:
 		addr->device_id = 0x40015800;
 		addr->flash_size = 0x1FFF0D00; // not sure
@@ -748,21 +748,6 @@ COMMAND_HANDLER(air001_handle_part_id_command)
 }
 #endif
 
-static const char *get_stm32f0_revision(uint16_t rev_id)
-{
-	const char *rev_str = NULL;
-
-	switch (rev_id) {
-	case 0x1000:
-		rev_str = "1.0";
-		break;
-	case 0x2000:
-		rev_str = "2.0";
-		break;
-	}
-	return rev_str;
-}
-
 static int get_air001_info(struct flash_bank *bank, struct command_invocation *cmd)
 {
 	uint32_t dbgmcu_idcode;
@@ -907,7 +892,7 @@ COMMAND_HANDLER(air001_handle_options_read_command)
 	if (retval != ERROR_OK)
 		return retval;
 
-	retval = target_read_u32(target, STM32_FLASH_OBR_B0, &optionbyte);
+	retval = target_read_u32(target, AIR001_FLASH_OPTR_B0, &optionbyte);
 	if (retval != ERROR_OK)
 		return retval;
 
