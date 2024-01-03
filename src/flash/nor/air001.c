@@ -14,6 +14,7 @@
  *   halfsweet@halfsweet.cn                                                *
  ***************************************************************************/
 
+#include <stdint.h>
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -385,42 +386,28 @@ static int air001_erase(struct flash_bank *bank, unsigned int first,
 	if ((first == 0) && (last == (bank->num_sectors - 1)))
 		return air001_mass_erase(bank);
 
-	// check busy, maybe another operation is pending
-	int retval = air001_wait_status_busy(bank, FLASH_PRE_TIMEOUT, false);
-	if (retval != ERROR_OK)
-		return retval;
+	// 计算需要擦除的扇区数量
+    uint32_t page_num = 0;
+    page_num = (last - first + 1) / bank->sectors[0].size;
+    uint8_t *buffer = malloc(page_num * bank->sectors[0].size);
+    if (buffer == NULL)
+    {
+        LOG_ERROR("malloc failed");
+        return -1;
+    }
+    memset(buffer, 0xFF, page_num * bank->sectors[0].size);
 
-	/* unlock flash registers */
-	retval = target_write_u32(target, air001_get_flash_reg(bank, AIR001_FLASH_KEYR), KEY1);
-	if (retval != ERROR_OK)
-		return retval;
-	retval = target_write_u32(target, air001_get_flash_reg(bank, AIR001_FLASH_KEYR), KEY2);
-	if (retval != ERROR_OK)
-		goto flash_lock;
+    int ret = ERROR_OK;
+    ret = air001_write(bank, buffer, bank->sectors[first].offset, page_num * bank->sectors[0].size);
+    if (ret != ERROR_OK)
+    {
+        LOG_ERROR("air001_write failed");
+        goto exit;
+    }
 
-	for (unsigned int i = first; i <= last; i++) {
-		retval = target_write_u32(target, air001_get_flash_reg(bank, AIR001_FLASH_CR), FLASH_SER | FLASH_EOPIE | FLASH_ERRIE);
-		if (retval != ERROR_OK)
-			goto flash_lock;
-
-		// todo: better find out base address
-		retval = target_write_u32(target, 0x08000000 + bank->sectors[i].offset, 0xFFFFFFFF);
-		if (retval != ERROR_OK) {
-			LOG_DEBUG("Ignoring address write retval %d ", retval);
-		}
-
-		retval = air001_wait_status_busy(bank, FLASH_ERASE_TIMEOUT, true);
-		if (retval != ERROR_OK)
-			goto flash_lock;
-	}
-
-flash_lock:
-	{
-		int retval2 = target_write_u32(target, air001_get_flash_reg(bank, AIR001_FLASH_CR), FLASH_LOCK);
-		if (retval == ERROR_OK)
-			retval = retval2;
-	}
-	return retval;
+exit:
+    free(buffer);
+    return ret;
 }
 
 static int air001_protect(struct flash_bank *bank, int set, unsigned int first,
