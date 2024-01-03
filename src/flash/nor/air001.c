@@ -1107,7 +1107,8 @@ static int air001_mass_erase(struct flash_bank *bank)
 
 	// according to datasheet we should write something to flash
 	// todo: get location
-	retval = target_write_u32(target, 0x08000004, 0xFFFFFFFF);
+	retval = target_write_u32(target, 0x08000000, 0xFF);
+    retval = target_write_u32(target, 0x08000000, 0xFF);
 	if (retval != ERROR_OK) {
 		LOG_DEBUG("Ignoring address write retval %d ", retval);
 	}
