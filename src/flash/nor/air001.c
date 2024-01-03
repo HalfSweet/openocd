@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: GPL-2.0-or-laterFailed to write m
 
 /***************************************************************************
  *   Copyright (C) 2005 by Dominic Rath                                    *
@@ -604,7 +604,10 @@ static int air001_get_flash_size(struct flash_bank *bank, uint16_t *flash_size_i
 	if (retval != ERROR_OK)
 		return retval;
 
-	return target_read_u16(target, addr.flash_size, flash_size_in_kb);
+    // The manufacturer doesn't specify
+    *flash_size_in_kb = 32;
+    return ERROR_OK;
+	// return target_read_u16(target, addr.flash_size, flash_size_in_kb);
 }
 
 static int air001_probe(struct flash_bank *bank)
@@ -642,6 +645,7 @@ static int air001_probe(struct flash_bank *bank)
 			LOG_WARNING("AIR001 MCU detected!");
 			page_size = AIR001_PAGE_SIZE;
 			air001_info->ppage_size = 4;
+            air001_info->user_bank_size = 32 * 1024;
 			max_flash_size_in_kb = 32;
 			air001_info->user_data_offset = 16;
 			air001_info->option_offset = 6;
