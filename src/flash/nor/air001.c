@@ -1077,7 +1077,6 @@ COMMAND_HANDLER(air001_handle_options_load_command)
 	return ERROR_OK;
 }
 
-// AIR001 verified ok
 static int air001_mass_erase(struct flash_bank *bank)
 {
 	struct target *target = bank->target;
@@ -1107,8 +1106,7 @@ static int air001_mass_erase(struct flash_bank *bank)
 
 	// according to datasheet we should write something to flash
 	// todo: get location
-    uint8_t data[2] = {0xAA, 0x55};
-	retval = target_write_memory(target, 0x08000000, 2, 1, data);
+	retval = target_write_u32(target, 0x08000000, 0xFF);
 	if (retval != ERROR_OK) {
 		LOG_DEBUG("Ignoring address write retval %d ", retval);
 	}
