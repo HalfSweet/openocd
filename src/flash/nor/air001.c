@@ -126,6 +126,8 @@ struct air001_flash_bank {
 static int air001_mass_erase(struct flash_bank *bank);
 static int air001_write_sector(struct flash_bank *bank, const uint8_t *buffer,
 		uint32_t address, uint32_t words_count);
+static int air001_write(struct flash_bank *bank, const uint8_t *buffer,
+		uint32_t offset, uint32_t count);
 
 /* flash bank air001 <base> <size> 0 0 <target#>
  */
@@ -376,8 +378,6 @@ static int air001_protect_check(struct flash_bank *bank)
 static int air001_erase(struct flash_bank *bank, unsigned int first,
 		unsigned int last)
 {
-	struct target *target = bank->target;
-
 	if (bank->target->state != TARGET_HALTED) {
 		LOG_ERROR("Target not halted");
 		return ERROR_TARGET_NOT_HALTED;
