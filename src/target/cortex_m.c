@@ -2181,7 +2181,8 @@ static int cortex_m_write_memory(struct target *target, target_addr_t address,
 	uint32_t size, uint32_t count, const uint8_t *buffer)
 {
 	struct armv7m_common *armv7m = target_to_armv7m(target);
-
+	LOG_DEBUG("cortex_m_write_memory: address: " TARGET_ADDR_FMT " size: %d count: %d",
+		address, size, count);
 	if (armv7m->arm.arch == ARM_ARCH_V6M) {
 		/* armv6m does not handle unaligned memory access */
 		if (((size == 4) && (address & 0x3u)) || ((size == 2) && (address & 0x1u)))
